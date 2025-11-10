@@ -165,6 +165,14 @@
         transition: background 0.2s;
       }
 
+      .btn-copy {
+        background: #0ea5e9;
+      }
+
+      .btn-copy:hover {
+        background: #0284c7;
+      }
+
       .btn-download {
         background: var(--primary);
       }
@@ -319,7 +327,11 @@
                 file.modified
               ).toLocaleString("de-DE")}</td>
               <td data-label="Kurzlink">
-                ${file.short_link ? `<a href="${file.short_link}" target="_blank" rel="noopener">${file.short_link}</a>` : '-'}
+                ${
+                  file.short_link
+                    ? `<button class="btn-copy" data-copy="${file.short_link}">Copy</button>`
+                    : "-"
+                }
               </td>
               <td data-label="Aktionen">
                 <div class="actions">
@@ -478,6 +490,14 @@
           downloadFile(target.dataset.download);
         } else if (target.matches("[data-delete]")) {
           deleteFile(target.dataset.delete);
+        } else if (target.matches("[data-copy]")) {
+          navigator.clipboard
+            .writeText(target.dataset.copy)
+            .then(() => {
+              target.textContent = "Kopiert!";
+              setTimeout(() => (target.textContent = "Copy"), 1500);
+            })
+            .catch(() => alert("Konnte Kurzlink nicht kopieren."));
         }
       });
 
