@@ -5,6 +5,9 @@ After=network.target
 [Service]
 User=www-data
 WorkingDirectory=/var/www/copy
+Environment="TIMEOUT=180"
+Environment="GRACEFUL_TIMEOUT=180"
+Environment="SENDFILE=False"
 ExecStart=/var/www/copy/start.sh
 Restart=always
 Environment="PATH=/usr/bin"

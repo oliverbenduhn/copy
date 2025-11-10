@@ -19,4 +19,10 @@ if [[ ! -x "$ROOT_DIR/.venv/bin/gunicorn" ]]; then
   exit 1
 fi
 
-exec "$ROOT_DIR/.venv/bin/gunicorn" --bind 0.0.0.0:8089 --workers "${WORKERS:-4}" app:app
+exec "$ROOT_DIR/.venv/bin/gunicorn" \
+  --bind 0.0.0.0:8089 \
+  --workers "${WORKERS:-4}" \
+  --timeout "${TIMEOUT:-180}" \
+  --graceful-timeout "${GRACEFUL_TIMEOUT:-180}" \
+  --sendfile "${SENDFILE:-False}" \
+  app:app
