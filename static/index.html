@@ -269,6 +269,7 @@
               <th>Dateiname</th>
               <th>Größe</th>
               <th>Geändert am</th>
+              <th>Kurzlink</th>
               <th>Aktionen</th>
             </tr>
           </thead>
@@ -317,6 +318,9 @@
               <td data-label="Geändert">${new Date(
                 file.modified
               ).toLocaleString("de-DE")}</td>
+              <td data-label="Kurzlink">
+                ${file.short_link ? `<a href="${file.short_link}" target="_blank" rel="noopener">${file.short_link}</a>` : '-'}
+              </td>
               <td data-label="Aktionen">
                 <div class="actions">
                   <button class="btn-download" data-download="${file.name}">Download</button>

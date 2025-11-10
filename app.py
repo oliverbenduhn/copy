@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import logging
 import os
+import secrets
 import shutil
+import string
 import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_from_directory, url_for
 from flask_cors import CORS
 from werkzeug.http import parse_options_header
 from werkzeug.utils import secure_filename
@@ -21,6 +24,7 @@ from werkzeug.utils import secure_filename
 # Projektweite Konstanten definieren Upload-Pfad.
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_FOLDER = BASE_DIR / "transfer"
+SLUG_FILE = BASE_DIR / "slugs.json"
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_FOLDER)
 CORS(app)
@@ -76,6 +80,51 @@ def storage_info() -> dict:
         "free": usage.free,
         "free_formatted": format_size(usage.free),
     }
+
+
+def load_slugs() -> Dict[str, str]:
+    if SLUG_FILE.exists():
+        try:
+            return json.loads(SLUG_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def save_slugs(mapping: Dict[str, str]) -> None:
+    SLUG_FILE.write_text(
+        json.dumps(mapping, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
+def generate_slug(length: int = 5) -> str:
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def get_or_create_slug(filename: str) -> str:
+    slugs = load_slugs()
+    for slug, mapped in slugs.items():
+        if mapped == filename:
+            return slug
+    slug = generate_slug()
+    while slug in slugs:
+        slug = generate_slug()
+    slugs[slug] = filename
+    save_slugs(slugs)
+    return slug
+
+
+def delete_slug(filename: str) -> None:
+    slugs = load_slugs()
+    updated = {slug: name for slug, name in slugs.items() if name != filename}
+    if len(updated) != len(slugs):
+        save_slugs(updated)
+
+
+def get_filename_for_slug(slug: str) -> str | None:
+    slugs = load_slugs()
+    return slugs.get(slug)
 
 
 def ensure_space_available(required: int | None) -> None:
@@ -183,6 +232,15 @@ def get_files():
     """Return metadata for all uploaded files."""
     try:
         files = list_upload_files()
+        for entry in files:
+            slug = get_or_create_slug(entry["name"])
+            entry["short_code"] = slug
+            try:
+                entry["short_link"] = url_for(
+                    "resolve_short_link", slug=slug, _external=True
+                )
+            except RuntimeError:
+                entry["short_link"] = f"/s/{slug}"
         return jsonify(files)
     except Exception as exc:  # pragma: no cover - logged for operations
         logger.exception("Fehler beim Lesen der Dateien: %s", exc)
@@ -261,6 +319,7 @@ def delete_file(filename: str):
     try:
         file_path.unlink()
         logger.info("Datei %s gelöscht", file_path.name)
+        delete_slug(file_path.name)
         return jsonify({"success": True, "message": "Datei gelöscht"})
     except Exception as exc:  # pragma: no cover
         logger.exception("Fehler beim Löschen: %s", exc)
@@ -305,6 +364,28 @@ def get_storage():
     except Exception as exc:  # pragma: no cover
         logger.exception("Fehler beim Lesen des Speicherplatzes: %s", exc)
         return jsonify({"error": "Speicherinfo nicht verfügbar"}), 500
+
+
+@app.route("/s/<slug>", methods=["GET"])
+def resolve_short_link(slug: str):
+    """Leite Kurzlinks auf die eigentliche Datei weiter."""
+    filename = get_filename_for_slug(slug)
+    if not filename:
+        return jsonify({"error": "Kurzlink unbekannt"}), 404
+
+    try:
+        file_path = validated_real_path(filename)
+    except PermissionError:
+        return jsonify({"error": "Ungültiger Pfad"}), 403
+
+    if not file_path.exists():
+        return jsonify({"error": "Datei nicht gefunden"}), 404
+
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        file_path.name,
+        as_attachment=True,
+    )
 
 
 if __name__ == "__main__":

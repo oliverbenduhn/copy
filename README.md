@@ -38,15 +38,16 @@ Das Skript nutzt `.venv/bin/gunicorn`. Für einen manuellen Start:
 
 Uploads sowie URL-Downloads werden automatisch blockiert, wenn nicht genug freier Speicher vorhanden ist. Die UI zeigt den aktuell freien Speicherbereich an.
 
-Weitere Anpassungen (z. B. Styling) erfolgen über `static/index.html`.
+Weitere Anpassungen (z. B. Styling) erfolgen über `static/index.html`. Für jeden Upload wird automatisch ein Kurzlink erzeugt und im Frontend angezeigt.
 
 ## API-Endpunkte
 
-- `GET /api/files` – Liste der Dateien mit Metadaten
+- `GET /api/files` – Liste der Dateien mit Metadaten inkl. Kurzlink (`short_link`)
 - `POST /api/upload` – Multipart Upload (`file` Feld)
 - `POST /api/download-url` – Lädt eine Datei anhand einer URL herunter
 - `GET /api/storage` – Liefert Gesamt-, Belegt- und freien Speicherplatz
 - `GET /download/<filename>` – Datei herunterladen
+- `GET /s/<slug>` – Kurzlink, der direkt auf den Download zeigt
 - `DELETE /api/files/<filename>` – Datei löschen
 
 ## Testing

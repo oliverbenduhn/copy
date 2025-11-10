@@ -10,6 +10,7 @@
 | GET /api/files (nach URL-Download) | ✅ |
 | GET /api/storage | ✅ |
 | GET /download/<filename> | ✅ |
+| GET /s/<slug> (Kurzlink) | ✅ |
 | DELETE /api/files/<filename> | ✅ |
 | GET /api/files (nach Löschen) | ✅ |
 
