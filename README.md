@@ -2,6 +2,8 @@
 
 Einfache Flask-Anwendung zum Hochladen, Auflisten, Herunterladen und Löschen von Dateien ohne Benutzerkonto. Frontend und Backend folgen der Projektspezifikation in `projekt.md`.
 
+> **Kommunikation:** Bitte ausschließlich auf Deutsch antworten, wenn Fragen zu diesem Projekt gestellt oder Änderungen beschrieben werden.
+
 ## Installation
 
 1. Python 3.11+ bereitstellen.
@@ -37,6 +39,10 @@ Das Skript nutzt `.venv/bin/gunicorn`. Für einen manuellen Start:
 | Dateigröße  | (kein Limit serverseitig) | Limit wird nur durch verfügbaren Speicher bestimmt |
 
 Uploads sowie URL-Downloads werden automatisch blockiert, wenn nicht genug freier Speicher vorhanden ist. Die UI zeigt den aktuell freien Speicherbereich an.
+
+## Progressive Web App
+
+Das Frontend bringt ein Manifest (`static/manifest.webmanifest`) und einen Service Worker (`static/sw.js`) mit, sodass COPY auf unterstützten Endgeräten als PWA installiert und offline gecacht werden kann.
 
 Weitere Anpassungen (z. B. Styling) erfolgen über `static/index.html`. Für jeden Upload wird automatisch ein Kurzlink erzeugt und im Frontend angezeigt.
 
