@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COPY</title>
+    <!-- Grundlegendes Styling für Layout, Typografie und Komponenten -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        --bg: #f4f6fb;
+        --card-bg: #ffffff;
+        --border: #cfd5e3;
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --danger: #dc2626;
+        --danger-hover: #b91c1c;
+        --text: #111827;
+        --muted: #6b7280;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      header {
+        padding: 2rem 1rem 0;
+        text-align: center;
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+      }
+
+      #upload-zone {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .url-download {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .storage-info {
+        margin-top: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: var(--muted);
+      }
+
+      .url-download input {
+        flex: 1 1 240px;
+        padding: 0.65rem 0.85rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 1rem;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+
+      .drop-zone {
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        transition: border-color 0.2s, background 0.2s;
+        cursor: pointer;
+        background: #f8fafc;
+      }
+
+      .drop-zone.dragover {
+        border-color: var(--primary);
+        background: #dbeafe;
+      }
+
+      .drop-zone p {
+        margin: 0.25rem 0;
+      }
+
+      #progress-container {
+        display: none;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      progress {
+        width: 100%;
+        height: 12px;
+        border-radius: 999px;
+        overflow: hidden;
+        appearance: none;
+      }
+
+      progress::-webkit-progress-bar {
+        background-color: #e5e7eb;
+      }
+
+      progress::-webkit-progress-value {
+        background-color: var(--primary);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: #eef2ff;
+      }
+
+      th,
+      td {
+        padding: 0.85rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      tbody tr:nth-child(even) {
+        background: #f9fafb;
+      }
+
+      tbody tr:hover {
+        background: #e0f2fe;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 0.9rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: white;
+        transition: background 0.2s;
+      }
+
+      .btn-download {
+        background: var(--primary);
+      }
+
+      .btn-download:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn-delete {
+        background: var(--danger);
+      }
+
+      .btn-delete:hover {
+        background: var(--danger-hover);
+      }
+
+      .filename {
+        color: var(--primary);
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      @media (max-width: 720px) {
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        tr {
+          margin-bottom: 1rem;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 0.75rem;
+        }
+
+        th {
+          display: none;
+        }
+
+        td {
+          border: none;
+          padding: 0.3rem 0;
+        }
+
+        td::before {
+          content: attr(data-label);
+          font-weight: 600;
+          display: block;
+          color: var(--muted);
+        }
+
+        .actions {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>COPY</h1>
+      <p>Dateien schnell hochladen, herunterladen oder löschen.</p>
+    </header>
+    <main>
+      <!-- Upload-Karte mit Drop-Zone und Fortschritt -->
+      <section class="card" id="upload-zone">
+        <div class="drop-zone" id="drop-zone">
+          <p><strong>Drag & Drop</strong> oder Klick zum Auswählen</p>
+          <p class="hint">Beliebige Dateitypen möglich – Achtung bei großen Dateien.</p>
+          <input type="file" id="file-input" multiple hidden />
+        </div>
+        <div id="progress-container">
+          <progress id="upload-progress" value="0" max="100"></progress>
+          <span id="progress-text">0%</span>
+        </div>
+        <div class="url-download">
+          <input
+            type="url"
+            id="url-input"
+            placeholder="https://beispiel.de/datei.pdf"
+            aria-label="Datei-URL"
+          />
+          <button class="btn-primary" id="url-download-btn">Datei von URL laden</button>
+        </div>
+        <small style="color: var(--muted)">
+          Hinweis: Es werden nur erlaubte Dateitypen automatisch heruntergeladen.
+        </small>
+      </section>
+
+      <!-- Dateiliste -->
+      <section class="card" id="file-list">
+        <h2>Hochgeladene Dateien</h2>
+        <div class="storage-info" id="storage-info">
+          Speicher wird geladen …
+        </div>
+        <table id="files-table">
+          <thead>
+            <tr>
+              <th>Dateiname</th>
+              <th>Größe</th>
+              <th>Geändert am</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="files-tbody"></tbody>
+        </table>
+        <p id="empty-state" style="display: none; color: var(--muted)">
+          Noch keine Dateien hochgeladen.
+        </p>
+      </section>
+    </main>
+
+    <!-- App-Logik -->
+    <script>
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("file-input");
+      const progressContainer = document.getElementById("progress-container");
+      const progressBar = document.getElementById("upload-progress");
+      const progressText = document.getElementById("progress-text");
+      const filesTbody = document.getElementById("files-tbody");
+      const emptyState = document.getElementById("empty-state");
+      const urlInput = document.getElementById("url-input");
+      const urlButton = document.getElementById("url-download-btn");
+      const storageInfo = document.getElementById("storage-info");
+
+      // Lädt Dateiliste beim Start und nach Aktionen
+      async function loadFiles() {
+        try {
+          const response = await fetch("/api/files");
+          if (!response.ok) {
+            throw new Error("Fehler beim Laden der Dateiliste");
+          }
+          const files = await response.json();
+          filesTbody.innerHTML = "";
+          if (files.length === 0) {
+            emptyState.style.display = "block";
+            return;
+          }
+          emptyState.style.display = "none";
+          files.forEach((file) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td data-label="Dateiname">
+                <span class="filename" data-filename="${file.name}">${file.name}</span>
+              </td>
+              <td data-label="Größe">${file.size_formatted}</td>
+              <td data-label="Geändert">${new Date(
+                file.modified
+              ).toLocaleString("de-DE")}</td>
+              <td data-label="Aktionen">
+                <div class="actions">
+                  <button class="btn-download" data-download="${file.name}">Download</button>
+                  <button class="btn-delete" data-delete="${file.name}">Löschen</button>
+                </div>
+              </td>
+            `;
+            filesTbody.appendChild(row);
+          });
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      async function loadStorage() {
+        try {
+          const response = await fetch("/api/storage");
+          if (!response.ok) {
+            throw new Error("Speicherinfo nicht verfügbar");
+          }
+          const info = await response.json();
+          storageInfo.textContent = `Freier Speicher: ${info.free_formatted} / Gesamt: ${info.total_formatted}`;
+        } catch (error) {
+          storageInfo.textContent = error.message;
+        }
+      }
+
+      // Sendet Dateien nacheinander zum Backend (inkl. Fortschritt)
+      function uploadFiles(files) {
+        if (!files || files.length === 0) {
+          return;
+        }
+
+        progressContainer.style.display = "flex";
+
+        Array.from(files).forEach((file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/api/upload", true);
+
+          xhr.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              progressBar.value = percent;
+              progressText.textContent = `${percent}%`;
+            }
+          });
+
+          xhr.addEventListener("load", () => {
+            if (xhr.status === 200) {
+              loadFiles();
+              loadStorage();
+            } else {
+              alert("Upload fehlgeschlagen: " + xhr.responseText);
+            }
+            progressBar.value = 0;
+            progressText.textContent = "0%";
+            progressContainer.style.display = "none";
+            fileInput.value = "";
+          });
+
+          xhr.addEventListener("error", () => {
+            alert("Upload fehlgeschlagen.");
+            progressContainer.style.display = "none";
+          });
+
+          xhr.send(formData);
+        });
+      }
+
+      // Startet Dateidownload
+      function downloadFile(filename) {
+        window.location.href = `/download/${encodeURIComponent(filename)}`;
+      }
+
+      // Löscht Datei nach Bestätigung
+      async function deleteFile(filename) {
+        if (!confirm(`Datei "${filename}" wirklich löschen?`)) {
+          return;
+        }
+        const response = await fetch(
+          `/api/files/${encodeURIComponent(filename)}`,
+          { method: "DELETE" }
+        );
+        if (response.ok) {
+          loadFiles();
+          loadStorage();
+        } else {
+          alert("Fehler beim Löschen der Datei");
+        }
+      }
+
+      async function downloadFromUrl() {
+        const url = urlInput.value.trim();
+        if (!url) {
+          alert("Bitte eine gültige URL eingeben.");
+          return;
+        }
+        try {
+          const response = await fetch("/api/download-url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || "Download fehlgeschlagen.");
+          }
+          alert(payload.message || "Datei heruntergeladen.");
+          urlInput.value = "";
+          loadFiles();
+          loadStorage();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      // --- Event Listener --------------------------------------------------
+
+      dropZone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("dragover");
+      });
+
+      dropZone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        dropZone.classList.remove("dragover");
+        uploadFiles(event.dataTransfer.files);
+      });
+
+      dropZone.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (event) =>
+          uploadFiles(event.target.files)
+        );
+
+      urlButton.addEventListener("click", downloadFromUrl);
+      urlInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          downloadFromUrl();
+        }
+      });
+
+      filesTbody.addEventListener("click", (event) => {
+        const target = event.target;
+        if (target.matches(".filename")) {
+          downloadFile(target.dataset.filename);
+        } else if (target.matches("[data-download]")) {
+          downloadFile(target.dataset.download);
+        } else if (target.matches("[data-delete]")) {
+          deleteFile(target.dataset.delete);
+        }
+      });
+
+      window.onload = () => {
+        loadFiles();
+        loadStorage();
+      };
+    </script>
+  </body>
+</html>

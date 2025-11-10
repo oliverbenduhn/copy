@@ -1,0 +1,13 @@
+[Unit]
+Description=File Uploader Service
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/copy
+ExecStart=/var/www/copy/start.sh
+Restart=always
+Environment="PATH=/usr/bin"
+
+[Install]
+WantedBy=multi-user.target

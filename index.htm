@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kiosk-Setup – NFS & Script</title>
+  <style>
+    :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --card:#111827; --accent:#38bdf8; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 2rem;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--fg); background: radial-gradient(1200px 800px at 20% -20%, #1f2937 0%, #0b1220 40%, #050914 100%);
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    header { margin-bottom: 2rem; }
+    h1 { font-size: clamp(1.5rem, 2.5vw + 1rem, 2.4rem); margin: 0 0 .5rem; letter-spacing: .2px; }
+    p.lead { margin: 0; color: var(--muted); }
+    section.step { background: rgba(17,24,39,.6); border: 1px solid rgba(148,163,184,.15); border-radius: 16px; padding: 1rem; margin: 1rem 0 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    h2 { font-size: 1.1rem; margin: .25rem 0 .75rem; font-weight: 700; letter-spacing: .2px; }
+    .code-wrap { position: relative; }
+    pre {
+      margin: 0; padding: 1rem 3.5rem 1rem 1rem; overflow: auto;
+      background: #0b1220; border: 1px solid rgba(148,163,184,.18); border-radius: 12px;
+      line-height: 1.5; font-size: .95rem;
+    }
+    code { font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; color: #e5e7eb; }
+    button.copy {
+      position: absolute; top: .6rem; right: .6rem;
+      border: 1px solid rgba(148,163,184,.25);
+      background: linear-gradient(180deg, #111827, #0b1220);
+      color: var(--fg); border-radius: 10px; padding: .4rem .6rem; cursor: pointer; font-size: .85rem;
+    }
+    button.copy:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.18) inset; }
+    footer { margin-top: 2rem; color: var(--muted); font-size: .9rem; text-align: center; }
+    .kbd { display:inline-block; padding:.15rem .4rem; border:1px solid rgba(148,163,184,.35); border-bottom-width:2px; border-radius:6px; background:#0b1220; font-family:inherit; font-size:.85rem; color:var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Setup: Kiosk-Client</h1>
+      <p class="lead">Führe die Schritte nacheinander im Terminal aus.</p>
+    </header>
+
+    <section class="step">
+      <h2>1) NFS mounten</h2>
+      <div class="code-wrap">
+        <button class="copy" data-target="cmd1">Kopieren</button>
+        <pre id="cmd1"><code>sudo apt install -y nfs-common
+
+sudo mkdir -p /mnt/kiosk
+
+sudo mount 192.168.66.10:/srv/kiosk /mnt/kiosk</code></pre>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2>2) Skript ausführen</h2>
+      <div class="code-wrap">
+        <button class="copy" data-target="cmd2">Kopieren</button>
+        <pre id="cmd2"><code>sudo bash /mnt/kiosk/kioskify.sh</code></pre>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2>3) Neustart</h2>
+      <div class="code-wrap">
+        <button class="copy" data-target="cmd3">Kopieren</button>
+        <pre id="cmd3"><code>sudo reboot</code></pre>
+      </div>
+    </section>
+
+    <footer>
+      Tipp: Mit <span class="kbd">Strg</span>+<span class="kbd">Shift</span>+<span class="kbd">V</span> fügst du in vielen Terminals ein.
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('button.copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-target');
+        const el = document.getElementById(id);
+        const text = el.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const old = btn.textContent;
+          btn.textContent = 'Kopiert ✔';
+          setTimeout(() => btn.textContent = old, 1400);
+        }).catch(() => {
+          // Fallback: Auswahl markieren
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
