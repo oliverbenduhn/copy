@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List, Tuple
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -143,16 +144,20 @@ def download_remote_file(url: str) -> str:
     if not url.lower().startswith(("http://", "https://")):
         raise ValueError("Nur HTTP/HTTPS URLs sind erlaubt")
 
-    request_headers = {"User-Agent": "MinimalUploader/1.0"}
+    request_headers = {
+        "User-Agent": "COPY-Uploader/1.0",
+        "Accept": "*/*",
+    }
     req = Request(url, headers=request_headers)
 
     try:
-        with urlopen(req, timeout=60) as response:  # nosec: trusted whitelist of schemes
+        with urlopen(req, timeout=60) as response:  # nosec - urllib handles http/https
+            final_url = response.geturl()
             headers = dict(response.headers)
-            filename, _ = derive_filename_from_headers(url, headers)
+            filename, _ = derive_filename_from_headers(final_url, headers)
             destination = validated_real_path(filename)
-            content_length = response.headers.get("Content-Length")
-            if content_length:
+            content_length = headers.get("Content-Length")
+            if content_length and content_length.isdigit():
                 ensure_space_available(int(content_length))
 
             ensure_upload_dir()
@@ -169,7 +174,7 @@ def download_remote_file(url: str) -> str:
             return filename
     except ValueError:
         raise
-    except Exception as exc:  # pragma: no cover
+    except (HTTPError, URLError) as exc:  # pragma: no cover
         raise RuntimeError("Fehler beim Herunterladen der Datei") from exc
 
 

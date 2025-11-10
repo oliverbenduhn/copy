@@ -6,6 +6,7 @@
 | POST /api/upload (Textdatei) | ✅ |
 | GET /api/files (nach Upload) | ✅ |
 | POST /api/download-url (lokaler Testserver) | ✅ |
+| POST /api/download-url (Redirect-Kette) | ✅ |
 | GET /api/files (nach URL-Download) | ✅ |
 | GET /api/storage | ✅ |
 | GET /download/<filename> | ✅ |
