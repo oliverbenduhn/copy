@@ -19,10 +19,20 @@ if [[ ! -x "$ROOT_DIR/.venv/bin/gunicorn" ]]; then
   exit 1
 fi
 
+SENDFILE_FLAG=""
+case "${SENDFILE:-False}" in
+  [Tt]rue|1|yes|on)
+    SENDFILE_FLAG="--sendfile"
+    ;;
+  *)
+    SENDFILE_FLAG="--no-sendfile"
+    ;;
+esac
+
 exec "$ROOT_DIR/.venv/bin/gunicorn" \
   --bind 0.0.0.0:8089 \
   --workers "${WORKERS:-4}" \
   --timeout "${TIMEOUT:-180}" \
   --graceful-timeout "${GRACEFUL_TIMEOUT:-180}" \
-  --sendfile "${SENDFILE:-False}" \
+  $SENDFILE_FLAG \
   app:app
