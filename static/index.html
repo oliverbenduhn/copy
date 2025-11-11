@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>COPY</title>
     <meta name="theme-color" content="#135bec" />
-    <link rel="manifest" href="/static/manifest.webmanifest" />
-    <link rel="icon" href="/static/icons/icon-192.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <style>
       :root {
         font-family: "Inter", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -756,7 +756,7 @@
             <p class="drop-title">Tippe oder ziehe Dateien hierher</p>
             <p class="drop-sub">Uploads starten sofort.</p>
           </div>
-          <input type="file" id="file-input" multiple hidden />
+          <input type="file" id="file-input" accept="*/*" multiple hidden />
           <div id="progress-container" role="status" aria-live="polite"></div>
           <div id="upload-warning" class="upload-warning" role="status" aria-live="assertive">
             Upload läuft – bitte die Seite nicht verlassen.
