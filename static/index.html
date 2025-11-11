@@ -869,6 +869,8 @@
       let currentFiles = [];
       let sortState = { column: "name", direction: "asc" };
       let currentView = localStorage.getItem("copy-view") || "grid";
+      let transferUsageBytes = 0;
+      let storageFreeBytes = null;
 
       updateSortButtons();
       updateViewButtons();
@@ -898,6 +900,47 @@
           return;
         }
         urlProgress.hidden = !isActive;
+      }
+
+      function formatBytes(value) {
+        if (!Number.isFinite(value) || value < 0) {
+          return null;
+        }
+        const units = ["B", "KB", "MB", "GB", "TB"];
+        let idx = 0;
+        let num = value;
+        while (num >= 1024 && idx < units.length - 1) {
+          num /= 1024;
+          idx += 1;
+        }
+        const decimals = num >= 10 || idx === 0 ? 0 : 1;
+        return `${num.toFixed(decimals)} ${units[idx]}`;
+      }
+
+      function updateStorageDisplay() {
+        const usedBytes = transferUsageBytes;
+        const totalBytes = storageFreeBytes != null ? storageFreeBytes + usedBytes : null;
+        if (storageUsageLabel) {
+          if (totalBytes != null) {
+            storageUsageLabel.textContent = `Verbraucht: ${formatBytes(usedBytes) || "-"} von ${formatBytes(totalBytes) || "-"}`;
+          } else {
+            storageUsageLabel.textContent = `Verbraucht: ${formatBytes(usedBytes) || "-"}`;
+          }
+        }
+        if (storageUsageFree) {
+          storageUsageFree.textContent = storageFreeBytes != null ? `Frei: ${formatBytes(storageFreeBytes)}` : "";
+        }
+        if (storageProgressBar && storageProgressElement) {
+          if (totalBytes && totalBytes > 0) {
+            const percentUsed = Math.min(100, (usedBytes / totalBytes) * 100);
+            storageProgressBar.style.width = `${percentUsed}%`;
+            storageProgressElement.setAttribute("aria-valuenow", percentUsed.toFixed(1));
+            storageProgressElement.setAttribute("aria-label", `Speicherauslastung ${percentUsed.toFixed(0)} Prozent`);
+          } else {
+            storageProgressBar.style.width = "0%";
+            storageProgressElement.setAttribute("aria-valuenow", "0");
+          }
+        }
       }
 
       function updateSortButtons() {
@@ -1096,19 +1139,14 @@
             throw new Error("Fehler beim Laden der Dateiliste");
           }
           currentFiles = await response.json();
+          transferUsageBytes = currentFiles.reduce((total, file) => total + (file.size || 0), 0);
           updateSortButtons();
           renderFiles();
+          updateStorageDisplay();
         } catch (error) {
           alert(error.message);
         }
       }
-
-      const formatGB = (value) => {
-        if (typeof value !== "number" || Number.isNaN(value)) {
-          return null;
-        }
-        return `${(value / (1024 ** 3)).toFixed(1)} GB`;
-      };
 
       async function loadStorage() {
         try {
@@ -1117,30 +1155,10 @@
             throw new Error("Speicherinfo nicht verfügbar");
           }
           const info = await response.json();
-          const usedGB = formatGB(info.used);
-          const totalGB = formatGB(info.total);
-          const freeGB = formatGB(info.free);
-          if (storageUsageLabel) {
-            if (usedGB && totalGB) {
-              storageUsageLabel.textContent = `Verbraucht: ${usedGB} von ${totalGB}`;
-            } else {
-              storageUsageLabel.textContent = `Verbraucht: ${info.used_formatted} von ${info.total_formatted}`;
-            }
-          }
-          if (storageUsageFree) {
-            if (freeGB) {
-              storageUsageFree.textContent = `Frei: ${freeGB}`;
-            } else {
-              storageUsageFree.textContent = `Frei: ${info.free_formatted}`;
-            }
-          }
-          if (storageProgressBar && storageProgressElement) {
-            const percentUsed = info.total > 0 ? Math.min(100, (info.used / info.total) * 100) : 0;
-            storageProgressBar.style.width = `${percentUsed}%`;
-            storageProgressElement.setAttribute("aria-valuenow", percentUsed.toFixed(1));
-            storageProgressElement.setAttribute("aria-label", `Speicherauslastung ${percentUsed.toFixed(0)} Prozent`);
-          }
+          storageFreeBytes = Number.isFinite(info.free) ? info.free : null;
+          updateStorageDisplay();
         } catch (error) {
+          storageFreeBytes = null;
           if (storageUsageLabel) {
             storageUsageLabel.textContent = error.message;
           }
