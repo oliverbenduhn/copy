@@ -1,8 +1,17 @@
 # COPY
 
-Einfache Flask-Anwendung zum Hochladen, Auflisten, Herunterladen und Löschen von Dateien ohne Benutzerkonto. Frontend und Backend folgen der Projektspezifikation in `projekt.md`.
+Einfache Flask-Anwendung zum Hochladen, Auflisten, Herunterladen, Teilen und Löschen von Dateien ohne Benutzerkonto. Frontend und Backend folgen der Projektspezifikation in `projekt.md`.
 
 > **Kommunikation:** Bitte ausschließlich auf Deutsch antworten, wenn Fragen zu diesem Projekt gestellt oder Änderungen beschrieben werden.
+
+## Funktionsumfang
+
+- Drag & Drop Upload, Datei-Dialog (mobil: jedes Dateiformat) sowie Upload per URL inkl. Fortschrittsbalken.
+- Kurzlinks, Download/Löschaktionen und Benachrichtigungen komplett im UI-Stil (keine Browser-Alerts).
+- Grid/List-Ansicht samt eingeklappter Karten werden lokal im Browser gespeichert.
+- FAB (`+`) dient als sekundäre Drop-Zone und enthält Quick-Actions für Datei-Dialog und URL-Downloads.
+- Speicheranzeige basiert auf dem real belegten Platz im Ordner `transfer` plus freiem Speicher laut `shutil.disk_usage`.
+- Manifest + Service Worker machen COPY installierbar und offline-fähig (PWA).
 
 ## Installation
 
@@ -39,12 +48,22 @@ Das Skript nutzt `.venv/bin/gunicorn`. Für einen manuellen Start:
 | Dateigröße  | (kein Limit serverseitig) | Limit wird nur durch verfügbaren Speicher bestimmt |
 
 Uploads sowie URL-Downloads werden automatisch blockiert, wenn nicht genug freier Speicher vorhanden ist. Die UI zeigt den aktuell freien Speicherbereich an.
+Die sichtbare Speicheranzeige berechnet: `Verbraucht = Summe aller Dateien unter transfer/`, `Gesamt = Verbraucht + von Flask gemeldeter freier Speicher`.
 
 ## Progressive Web App
 
-Das Frontend bringt ein Manifest (`static/manifest.webmanifest`) und einen Service Worker (`static/sw.js`) mit, sodass COPY auf unterstützten Endgeräten als PWA installiert und offline gecacht werden kann.
+- Manifest liegt erreichbar unter `/manifest.webmanifest`, Icons unter `/icons/...` (Flask liefert `static/` direkt unter `/` aus).
+- Service Worker: `static/sw.js` (registriert beim Seitenstart).
+- COPY lässt sich auf unterstützten Endgeräten installieren und cacht das Frontend offline.
 
 Weitere Anpassungen (z. B. Styling) erfolgen über `static/index.html`. Für jeden Upload wird automatisch ein Kurzlink erzeugt und im Frontend angezeigt.
+
+## Frontend/UX
+
+- Alle Assets liegen in `static/`; das HTML wird ohne Build-Step direkt bearbeitet.
+- Grid/List-Ansicht, eingeklappte Karten und laufende Uploads werden per `localStorage` gespeichert.
+- Drag & Drop, FAB-Dropzone, URL-Uploads und Benachrichtigungen laufen komplett ohne Browser-Dialoge.
+- Fortschrittsanzeigen (Upload, URL, Speicherplatz) teilen sich das graue Balkendesign aus `static/index.html`.
 
 ## API-Endpunkte
 

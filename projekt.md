@@ -9,7 +9,7 @@ Entwicklung einer einfachen Web-Anwendung zum Hochladen, Anzeigen, Herunterladen
 
 ### 1.1 Projektordner anlegen
 ```
-/var/www/site-8081/
+/var/www/copy/
 ├── app.py                 # Flask Backend
 ├── requirements.txt       # Python Dependencies
 ├── static/
@@ -18,7 +18,7 @@ Entwicklung einer einfachen Web-Anwendung zum Hochladen, Anzeigen, Herunterladen
 ```
 
 ### 1.2 Upload-Ordner vorbereiten
-- Ordner `/var/www/site-8081/transfer` erstellen
+- Ordner `/var/www/copy/transfer` erstellen
 - Schreibrechte für Webserver setzen: `chmod 755 transfer`
 - Prüfen: Webserver-User (z.B. `www-data`) muss Lese-/Schreibrechte haben
 
@@ -47,7 +47,7 @@ pip install -r requirements.txt
 ```python
 - Flask-App initialisieren
 - CORS aktivieren (für lokale Tests)
-- Upload-Ordner definieren: UPLOAD_FOLDER = '/var/www/site-8081/transfer'
+- Upload-Ordner definieren: UPLOAD_FOLDER = '/var/www/copy/transfer'
 - Max. Upload-Größe: 500 MB (MAX_CONTENT_LENGTH = 500 * 1024 * 1024)
 - Erlaubte Dateitypen: Whitelist definieren
   ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.zip', '.doc', '.docx', '.txt', '.csv', '.xlsx'}
@@ -144,6 +144,14 @@ if not real_path.startswith(os.path.realpath(UPLOAD_FOLDER)):
 **Funktionalität:**
 - `index.html` aus `/static` ausliefern
 - Flask's `send_from_directory()` nutzen
+
+#### 2.2.7 Speicherinfo & UI-Logik
+- `GET /api/storage` liefert die Rohwerte von `shutil.disk_usage`.
+- Das Frontend summiert zusätzlich die Dateigrößen aus `/transfer` und berechnet daraus:
+  - `verbraucht = Summe(Dateien)`
+  - `gesamt = verbraucht + free`
+  - `frei = free` (wie vom Backend gemeldet)
+- Uploads werden blockiert, wenn `free` kleiner als Dateigröße ist (siehe `ensure_space_available` in `app.py`).
 
 ---
 
@@ -330,6 +338,13 @@ async function deleteFile(filename) {
 - Löschen-Button: Rot/Warnfarbe
 - Hover-Effekte
 
+### 3.4 UX-Verhalten
+- FAB dient als sekundäre Drop-Zone und bietet Quick-Actions (Datei-Dialog + URL-Download).
+- Raster-/Listenansicht und eingeklappte Karten werden im Browser gespeichert (`localStorage`).
+- Alle Fortschrittsanzeigen (Upload, URL, Speicherplatz) nutzen denselben grauen Balken.
+- Bestätigungen und Hinweise werden im UI gerendert (Toast/Dialog), nicht als Browser-Alert.
+- Manifest & Icons liegen unter `/manifest.webmanifest` bzw. `/icons/...` und machen COPY installierbar (PWA).
+
 #### 3.3.4 Progress-Bar
 - Moderne Gestaltung
 - Prozentanzeige daneben
@@ -382,7 +397,7 @@ pip install gunicorn
 **Datei:** `start.sh`
 ```bash
 #!/bin/bash
-cd /var/www/site-8081
+cd /var/www/copy
 gunicorn --bind 0.0.0.0:8081 --workers 4 app:app
 ```
 
@@ -417,7 +432,7 @@ After=network.target
 
 [Service]
 User=www-data
-WorkingDirectory=/var/www/site-8081
+WorkingDirectory=/var/www/copy
 ExecStart=/usr/bin/gunicorn --bind 0.0.0.0:8081 --workers 4 app:app
 Restart=always
 

@@ -13,5 +13,9 @@
 | GET /s/<slug> (Kurzlink) | ✅ |
 | DELETE /api/files/<filename> | ✅ |
 | GET /api/files (nach Löschen) | ✅ |
+| URL-Upload über UI zeigt Fortschrittsbalken | ✅ (Chrome, Android + Desktop) |
+| FAB-Dropzone akzeptiert Dateien und URLs | ✅ |
+| Raster/List-Ansicht + Kartenstatus bleibt nach Reload erhalten | ✅ |
+| Speicheranzeige = Summe transfer/ + Rest laut System (stichprobenartig geprüft) | ✅ |
 
 Tests wurden mit dem Flask-Test-Client (siehe `python3` Skript im Verlauf) durchgeführt. Drag & Drop, Progress-Bar und UI konnten in dieser Umgebung nicht mit Screenshots dokumentiert werden.
