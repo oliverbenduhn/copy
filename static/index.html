@@ -4,26 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>COPY</title>
-    <meta name="theme-color" content="#2563eb" />
+    <meta name="theme-color" content="#135bec" />
     <link rel="manifest" href="/static/manifest.webmanifest" />
     <link rel="icon" href="/static/icons/icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
-    <!-- Hypermodern Compact Android-like Styling -->
     <style>
       :root {
-        font-family: "Inter", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        --bg: #04060f;
-        --surface: rgba(10, 14, 26, 0.85);
-        --surface-contrast: rgba(17, 24, 39, 0.9);
-        --surface-accent: rgba(79, 70, 229, 0.14);
-        --primary: #8b5cf6;
-        --primary-hover: #a78bfa;
-        --danger: #f87171;
-        --danger-hover: #fb7185;
-        --text: #f8fafc;
-        --muted: #94a3b8;
-        --border: rgba(148, 163, 184, 0.25);
+        font-family: "Inter", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color-scheme: light;
+        --bg: #f6f6f8;
+        --surface: #ffffff;
+        --surface-alt: #f1f3fb;
+        --text: #111318;
+        --text-muted: #616f89;
+        --primary: #135bec;
+        --primary-strong: #0f4ac4;
+        --primary-soft: #dfe8ff;
+        --border: #e3e5ee;
+        --shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+        --radius: 12px;
+        --danger: #ef4444;
+        --danger-soft: rgba(239, 68, 68, 0.12);
       }
 
       * {
@@ -34,423 +35,597 @@
         margin: 0;
         min-height: 100vh;
         background: var(--bg);
-        color: var(--text);
         display: flex;
-        align-items: center;
         justify-content: center;
-        padding: 2vmin;
-        overflow: hidden;
+        padding: clamp(16px, 4vw, 32px);
+        -webkit-font-smoothing: antialiased;
       }
 
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: radial-gradient(circle at 20% 20%, #312e81 0%, transparent 45%),
-          radial-gradient(circle at 80% 0%, #9333ea 0%, transparent 40%),
-          radial-gradient(circle at 50% 80%, #0ea5e9 0%, transparent 35%);
-        filter: blur(60px);
-        opacity: 0.6;
-        z-index: -2;
+      button,
+      input,
+      textarea {
+        font: inherit;
       }
 
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(4, 7, 20, 0.95), rgba(7, 11, 26, 0.95));
-        z-index: -1;
-      }
-
-      .app-shell {
-        width: min(1100px, 100%);
+      .app {
+        width: min(420px, 100%);
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: clamp(1.25rem, 2vw, 1.75rem);
       }
 
-      header {
-        text-align: left;
-        padding: 0 0.25rem;
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: clamp(1.4rem, 2vw, 1.8rem);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      header p {
-        margin: 0.25rem 0 0;
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-
-      main {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 1.25rem;
-        min-height: 0;
-      }
-
-      .card {
-        background: var(--surface);
-        backdrop-filter: blur(18px);
-        border: 1px solid var(--border);
-        border-radius: 28px;
-        padding: 1.5rem;
-        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.45);
-        min-height: 0;
-      }
-
-      #upload-zone {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        min-height: 320px;
-      }
-
-      #file-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        min-height: 0;
-      }
-
-      .drop-zone {
-        border: 1px dashed rgba(139, 92, 246, 0.5);
-        border-radius: 24px;
-        padding: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        background: var(--surface-contrast);
-        transition: border 0.2s, transform 0.2s;
-        cursor: pointer;
-      }
-
-      .drop-zone:hover,
-      .drop-zone.dragover {
-        border-color: var(--primary);
-        transform: translateY(-2px);
-      }
-
-      .drop-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 22px;
-        display: grid;
-        place-items: center;
-        background: var(--surface-accent);
-        color: var(--primary);
-      }
-
-      .drop-copy {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
-
-      .drop-copy strong {
-        font-size: 1.05rem;
-      }
-
-      .url-download {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        background: var(--surface-contrast);
-        border-radius: 18px;
-        border: 1px solid var(--border);
-        padding: 0.4rem;
-      }
-
-      .url-download input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: var(--text);
-        font-size: 0.95rem;
-        padding: 0.75rem 1rem;
-      }
-
-      .url-download input::placeholder {
-        color: var(--muted);
-      }
-
-      .btn-primary {
-        background: linear-gradient(120deg, #7c3aed, #0ea5e9);
-        border-radius: 14px;
-        border: none;
-        padding: 0.9rem 1.5rem;
-        min-height: 44px;
-        cursor: pointer;
-        font-weight: 600;
-        color: white;
-        transition: transform 0.2s, box-shadow 0.2s;
-        font-size: 1rem;
-        touch-action: manipulation;
-        box-shadow: 0 10px 25px rgba(14, 165, 233, 0.35);
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 30px rgba(124, 58, 237, 0.35);
-      }
-
-      #progress-container {
-        display: none;
-        flex-direction: column;
-        gap: 0.65rem;
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        padding: 1rem;
-        background: var(--surface-contrast);
-      }
-
-      .progress-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-      }
-
-      .progress-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .progress-label {
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      .progress-cancel {
-        background: transparent;
-        border: none;
-        color: var(--danger);
-        font-size: 0.85rem;
-        cursor: pointer;
-        padding: 0.25rem 0.5rem;
-      }
-
-      progress {
-        width: 100%;
-        height: 8px;
-        border-radius: 999px;
-        appearance: none;
-        overflow: hidden;
-      }
-
-      progress::-webkit-progress-bar {
-        background: rgba(255, 255, 255, 0.1);
-      }
-
-      progress::-webkit-progress-value {
-        background: linear-gradient(120deg, #7c3aed, #0ea5e9);
-      }
-
-      .storage-info {
-        border-radius: 22px;
-        padding: 1rem;
-        background: var(--surface-contrast);
-        border: 1px solid var(--border);
+      .storage-section {
         display: flex;
         flex-direction: column;
         gap: 0.6rem;
       }
 
-      .storage-text {
+      .storage-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 0.95rem 1.05rem 1.1rem;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(19, 91, 236, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .storage-card__row {
         display: flex;
         justify-content: space-between;
-        gap: 0.5rem;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
+        color: var(--text-muted);
       }
 
-      .storage-progress {
+      .storage-card__row--values {
+        font-size: 0.85rem;
+        letter-spacing: 0;
+        color: var(--text);
+      }
+
+      .storage-bar {
         width: 100%;
-        height: 10px;
+        height: 8px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        position: relative;
+        background: var(--border);
         overflow: hidden;
+        position: relative;
       }
 
-      .storage-progress-bar {
+      .storage-bar__fill {
         position: absolute;
         inset: 0;
         width: 0%;
-        background: linear-gradient(120deg, #22d3ee, #7c3aed);
+        background: var(--text-muted);
         transition: width 0.3s ease;
       }
 
-      #storage-usage-free {
-        color: var(--muted);
-        font-weight: 500;
+      .app-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.85rem;
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 0.4rem 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .app-bar h1 {
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+      }
+
+      .app-bar__avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBux182deMDh3y8_RW5VHcrcf7ADiqBYf6F0xLmMlz1v_pBAP71utZwU2BMh9VSpJ0ljQmNC-bD8jbNn_tYkRfKjUhnZiGDYEsSZcrXCTphHjFHgn-pBLjnBhiVG72J8csY2TQ3pFQolqit3a3EbItcehPHXFh_oBqLnd5QstPH-8a4sM3dgo9DCoxUoun5gwluMfnZTqB7sGayvEJ8jGsIGzHFbTJulzrU8wUw-O7-kyfnmLPpe5IASceV3iRDtvhqKAmT2q0Ftrzi")
+          center/cover no-repeat;
+      }
+
+      .icon-button {
+        border: none;
+        background: transparent;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        color: var(--text);
+      }
+
+      .upload-card {
+        background: var(--surface);
+        padding: clamp(0.65rem, 1.8vw, 1rem) clamp(1rem, 2.5vw, 1.35rem) clamp(1rem, 2.5vw, 1.35rem);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-header h2 {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.05;
+      }
+
+      .section-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.05;
+      }
+
+      .files__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .section-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 0.2rem;
+      }
+
+      .section-body[hidden] {
+        display: none;
+      }
+
+      .section-toggle {
+        border: none;
+        background: rgba(0, 0, 0, 0.04);
+        width: 36px;
+        height: 32px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        margin-top: -0.1rem;
+      }
+
+      .section-toggle__icon {
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid var(--text);
+        transition: transform 0.2s ease;
+      }
+
+      .section-toggle[aria-expanded="false"] .section-toggle__icon {
+        transform: rotate(-90deg);
+      }
+
+      .drop-zone {
+        border-radius: var(--radius);
+        padding: 0.75rem;
+        background: var(--surface-alt);
+        border: 1px dashed rgba(19, 91, 236, 0.35);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.35rem;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .drop-zone:hover,
+      .drop-zone.dragover {
+        border-color: var(--primary);
+        background: #fff;
+      }
+
+      .drop-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      .drop-title {
+        margin: 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .drop-sub {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--border);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-track__fill {
+        position: absolute;
+        inset: 0;
+        width: 0%;
+        background: var(--text-muted);
+        transition: width 0.3s ease;
+      }
+
+      .progress-track--indeterminate .progress-track__fill {
+        animation: progress-indeterminate 1.2s ease-in-out infinite;
+      }
+
+      @keyframes progress-indeterminate {
+        0% {
+          transform: translateX(-100%);
+          width: 40%;
+        }
+        50% {
+          transform: translateX(-10%);
+          width: 60%;
+        }
+        100% {
+          transform: translateX(120%);
+          width: 40%;
+        }
+      }
+
+      .progress-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      #progress-container {
+        display: none;
+        flex-direction: column;
+        gap: 0.5rem;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        padding: 0.6rem 0.75rem;
+        background: var(--surface-alt);
+        margin-top: 0.4rem;
+      }
+
+      .progress-item {
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        padding: 0.65rem;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
       }
 
       .upload-warning {
         display: none;
-        padding: 0.75rem 1rem;
-        border-radius: 14px;
-        background: rgba(253, 224, 71, 0.12);
-        color: #fcd34d;
-        border: 1px solid rgba(250, 204, 21, 0.3);
+        padding: 0.75rem 0.9rem;
+        border-radius: 12px;
+        background: rgba(250, 204, 21, 0.15);
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        font-size: 0.85rem;
         font-weight: 600;
+        color: #b45309;
       }
 
-      .table-scroll {
-        flex: 1;
-        min-height: 0;
-        border-radius: 22px;
+      .url-download {
+        display: flex;
+        gap: 0.45rem;
+        align-items: center;
         border: 1px solid var(--border);
-        background: var(--surface-contrast);
-        overflow: hidden;
+        border-radius: 12px;
+        padding: 0.15rem 0.3rem;
+        background: #fff;
+      }
+
+      .url-download input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 0.5rem 0.35rem;
+        outline: none;
+        font-size: 0.9rem;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-strong);
+      }
+
+      .files {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: clamp(0.65rem, 1.8vw, 1rem) clamp(1rem, 2.5vw, 1.35rem) clamp(1rem, 2.5vw, 1.35rem);
         display: flex;
         flex-direction: column;
+        gap: 1.25rem;
       }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-        table-layout: fixed;
+      .files__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
 
-      thead {
-        background: rgba(148, 163, 184, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 2;
+      .files__header-title {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
       }
 
-      tbody {
-        display: block;
-        overflow-y: auto;
-        max-height: 320px;
-      }
-
-      tbody::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      tbody::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 999px;
-      }
-
-      thead tr,
-      tbody tr {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-      }
-
-      th,
-      td {
-        padding: 0.75rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-      }
-
-      th {
+      .files__view-label {
+        margin: 0;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        font-size: 0.75rem;
-        color: var(--muted);
+        color: var(--text-muted);
       }
 
-      tbody tr:nth-child(even) {
-        background: rgba(255, 255, 255, 0.02);
+      .files__header h2 {
+        margin: 0;
+        font-size: 1.1rem;
       }
 
-      tbody tr:hover {
-        background: rgba(124, 58, 237, 0.08);
-      }
-
-      .th-sort {
+      .view-switch {
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
-        font: inherit;
+        background: var(--surface-alt);
+        border-radius: 12px;
+        padding: 0.2rem;
+      }
+
+      .view-switch__btn {
         border: none;
         background: transparent;
-        color: inherit;
-        padding: 0;
-        cursor: pointer;
-      }
-
-      .th-sort[data-active="true"] {
-        color: var(--text);
-      }
-
-      .th-sort[data-direction="desc"] .sort-indicator {
-        transform: rotate(180deg);
-      }
-
-      .sort-indicator {
-        width: 0;
-        height: 0;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-top: 6px solid currentColor;
-        transition: transform 0.2s;
-      }
-
-      .file-entry {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .file-icon {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 32px;
         border-radius: 10px;
-        display: grid;
-        place-items: center;
-        background: rgba(124, 58, 237, 0.2);
-        color: var(--primary);
+        cursor: pointer;
+        color: var(--text-muted);
         font-size: 0.95rem;
       }
 
-      .filename {
+      .view-switch__btn[data-active="true"],
+      .view-switch__btn[data-active="true"]:focus {
+        background: #fff;
         color: var(--text);
-        text-decoration: none;
-        font-weight: 600;
+        box-shadow: 0 6px 15px rgba(15, 23, 42, 0.12);
       }
 
-      .actions {
+      .file-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+
+      .file-card {
+        background: var(--surface-alt);
+        border-radius: var(--radius);
+        padding: 0.9rem;
         display: flex;
-        gap: 0.4rem;
-        justify-content: flex-end;
+        flex-direction: column;
+        gap: 0.65rem;
+        position: relative;
       }
 
-      .btn-copy,
-      .btn-download,
-      .btn-delete {
+      .file-card__preview {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        background: linear-gradient(135deg, var(--primary-soft), #fff);
+        color: var(--primary);
+        cursor: pointer;
+      }
+
+      .file-card__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .file-card__name {
+        margin: 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+        word-break: break-all;
+      }
+
+      .file-card__details {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      .file-card__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.4rem;
+      }
+
+      .file-card__actions .icon-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid var(--border);
+      }
+
+      .file-entry {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        min-width: 0;
+      }
+
+      .file-icon {
+        width: 40px;
+        height: 40px;
         border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-soft);
+        color: var(--primary);
+        font-size: 1rem;
+        transition: opacity 0.2s ease;
+      }
+
+      .icon-btn {
         border: none;
-        padding: 0.55rem 0.9rem;
-        font-size: 0.85rem;
+        cursor: pointer;
+        background: transparent;
+        color: var(--text);
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
       }
 
       .btn-copy {
-        background: rgba(14, 165, 233, 0.25);
-        color: #38bdf8;
-      }
-
-      .btn-download {
-        background: rgba(124, 58, 237, 0.35);
-        color: var(--text);
+        color: var(--primary);
       }
 
       .btn-delete {
-        background: rgba(248, 113, 113, 0.3);
-        color: #fecdd3;
+        color: var(--danger);
+      }
+
+      #empty-state {
+        margin: 0;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      .table-scroll {
+        display: none;
+        overflow-x: hidden;
+        border-radius: var(--radius);
+      }
+
+      .table-scroll table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        background: transparent;
+        table-layout: auto;
+      }
+
+      .table-scroll th,
+      .table-scroll td {
+        padding: 0.45rem 0.3rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+
+      .table-scroll tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .table-scroll th:first-child,
+      .table-scroll td:first-child {
+        width: auto;
+        min-width: 0;
+      }
+
+      .table-scroll th:nth-child(2),
+      .table-scroll td:nth-child(2) {
+        width: 50px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .table-scroll th:nth-child(3),
+      .table-scroll td:nth-child(3) {
+        width: 100px;
+      }
+
+      .table-scroll th:nth-child(4),
+      .table-scroll td:nth-child(4) {
+        width: 35px;
+        text-align: center;
+        padding-right: 5px;
+      }
+
+      .table-scroll th:nth-child(5),
+      .table-scroll td:nth-child(5) {
+        width: 35px;
+        text-align: right;
+      }
+
+      .filename {
+        display: inline-block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .table-scroll .file-entry {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.3rem;
+      }
+
+      .table-scroll .filename {
+        display: -webkit-box;
+        flex: 1;
+        white-space: normal;
+        line-height: 1.1;
+        font-size: 0.8rem;
+        overflow: hidden;
+        word-break: break-word;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+
+      .table-scroll .file-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        background: transparent;
+        color: var(--text-muted);
       }
 
       .col-size {
@@ -458,145 +633,245 @@
         font-variant-numeric: tabular-nums;
       }
 
-      .table-scroll + #empty-state {
-        text-align: center;
+      .fab {
+        position: relative;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: none;
+        background: var(--primary);
+        color: #fff;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow);
+        cursor: pointer;
       }
 
-      @media (max-width: 768px) {
+      .fab-wrapper {
+        position: fixed;
+        right: clamp(16px, 4vw, 32px);
+        bottom: clamp(16px, 4vw, 32px);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+      }
+
+      .fab-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0.6rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .fab-wrapper.open .fab-menu {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      .fab-wrapper.is-dropping .fab {
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      .fab-menu button {
+        border: none;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        padding: 0.55rem 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .fab-menu__group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        width: 220px;
+      }
+
+      .fab-menu__label {
+        margin: 0;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+
+      .fab-menu__input-row {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+      }
+
+      .fab-menu__input-row input {
+        flex: 1;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.9rem;
+      }
+
+      @media (min-width: 768px) {
         body {
-          overflow: auto;
-          padding: 1rem;
-        }
-
-        main {
-          grid-template-columns: 1fr;
-        }
-
-        tbody {
-          max-height: 260px;
+          background:
+            radial-gradient(circle at 10% 20%, rgba(19, 91, 236, 0.12), transparent 55%),
+            radial-gradient(circle at 80% 0%, rgba(138, 92, 246, 0.15), transparent 40%),
+            linear-gradient(180deg, #f8faff 0%, #eef2ff 70%);
         }
       }
     </style>
   </head>
   <body>
-    <div class="app-shell">
-      <header>
-      <h1>COPY</h1>
-      <p>Dateien schnell hochladen, herunterladen oder löschen.</p>
-    </header>
-    <main>
-      <!-- Upload-Karte mit Drop-Zone und Fortschritt -->
-      <section class="card" id="upload-zone">
-        <div class="drop-zone" id="drop-zone">
-          <div class="drop-icon" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3L12 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M7 8L12 3L17 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M6 16V18C6 19.1046 6.89543 20 8 20H16C17.1046 20 18 19.1046 18 18V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-          <div class="drop-copy">
-            <p><strong>Drag & Drop</strong> oder Klick zum Auswählen</p>
+    <div class="app">
+      <header class="app-bar">
+        <div class="app-bar__avatar" aria-hidden="true"></div>
+        <h1>COPY</h1>
+      </header>
+
+      <section class="upload-card" id="upload-zone">
+        <div class="section-header">
+          <h2>Dateien hochladen</h2>
+          <button class="section-toggle" type="button" data-toggle-section="upload-body" aria-expanded="true" aria-label="Uploadbereich ein- oder ausblenden">
+            <span class="section-toggle__icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="section-body" id="upload-body">
+          <div class="drop-zone" id="drop-zone">
+            <div class="drop-icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3L12 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M7 8L12 3L17 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M6 16V18C6 19.1046 6.89543 20 8 20H16C17.1046 20 18 19.1046 18 18V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <p class="drop-title">Tippe oder ziehe Dateien hierher</p>
+            <p class="drop-sub">Uploads starten sofort.</p>
           </div>
           <input type="file" id="file-input" multiple hidden />
-        </div>
-        <div id="progress-container" role="status" aria-live="polite"></div>
-        <div
-          id="upload-warning"
-          class="upload-warning"
-          role="status"
-          aria-live="assertive"
-        >
-          Upload läuft – bitte die Seite nicht neu laden oder verlassen.
-        </div>
-        <div class="url-download">
-          <input
-            type="url"
-            id="url-input"
-            placeholder="https://beispiel.de/datei.pdf"
-            aria-label="Datei-URL"
-          />
-          <button class="btn-primary" id="url-download-btn">Datei von URL laden</button>
+          <div id="progress-container" role="status" aria-live="polite"></div>
+          <div id="upload-warning" class="upload-warning" role="status" aria-live="assertive">
+            Upload läuft – bitte die Seite nicht verlassen.
+          </div>
+          <div class="url-download">
+            <input type="url" id="url-input" placeholder="https://beispiel.de/datei.pdf" aria-label="Datei-URL" />
+            <button class="btn-primary" id="url-download-btn">Datei von URL laden</button>
+          </div>
+          <div class="url-progress" id="url-progress" hidden>
+            <span>Download läuft …</span>
+            <div class="progress-track progress-track--indeterminate">
+              <div class="progress-track__fill"></div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Dateiliste -->
-      <section class="card" id="file-list">
-        <h2>Hochgeladene Dateien</h2>
-        <div class="storage-info" id="storage-info">
-          <div class="storage-text">
-            <span id="storage-usage-label">Speicher wird geladen …</span>
-            <span id="storage-usage-free"></span>
+      <section class="files" id="file-list">
+        <div class="section-header files__header">
+          <div class="files__header-title">
+            <h2>Dateien</h2>
+            <p class="files__view-label" id="files-view-label">Rasteransicht</p>
           </div>
-          <div
-            class="storage-progress"
-            id="storage-progress"
-            role="progressbar"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="0"
-          >
-            <div class="storage-progress-bar" id="storage-progress-bar"></div>
+          <div class="files__actions">
+            <div class="view-switch">
+              <button type="button" class="view-switch__btn" data-view="grid" data-active="true" aria-label="Rasteransicht">▦</button>
+              <button type="button" class="view-switch__btn" data-view="list" aria-label="Listenansicht">☰</button>
+            </div>
+            <button class="section-toggle" type="button" data-toggle-section="files-body" aria-expanded="true" aria-label="Dateiliste ein- oder ausblenden">
+              <span class="section-toggle__icon" aria-hidden="true"></span>
+            </button>
           </div>
         </div>
-        <div class="table-scroll">
-          <table id="files-table">
-            <thead>
-              <tr>
-                <th>
-                  <button type="button" class="th-sort" data-sort="name">
-                    <span>Dateiname</span>
-                    <span class="sort-indicator" aria-hidden="true"></span>
-                  </button>
-                </th>
-                <th>
-                  <button type="button" class="th-sort" data-sort="size">
-                    <span>Größe</span>
-                    <span class="sort-indicator" aria-hidden="true"></span>
-                  </button>
-                </th>
-                <th>
-                  <button type="button" class="th-sort" data-sort="modified">
-                    <span>Geändert am</span>
-                    <span class="sort-indicator" aria-hidden="true"></span>
-                  </button>
-                </th>
-                <th>Kurzlink</th>
-                <th>Aktionen</th>
-              </tr>
-            </thead>
-            <tbody id="files-tbody"></tbody>
-          </table>
+        <div class="section-body" id="files-body">
+          <div class="file-cards" id="files-cards"></div>
+          <p id="empty-state" role="status">Keine Dateien vorhanden.</p>
+          <div class="table-scroll">
+            <table id="files-table">
+              <tbody id="files-tbody"></tbody>
+            </table>
+          </div>
         </div>
-        <p id="empty-state" style="display: none; color: var(--muted)">
-          Noch keine Dateien hochgeladen.
-        </p>
       </section>
-    </main>
+
+      <section class="storage-section">
+        <div class="storage-card storage-info" id="storage-info">
+          <div class="section-header">
+            <h3>Speicherplatz</h3>
+            <button class="section-toggle" type="button" data-toggle-section="storage-body" aria-expanded="true" aria-label="Speicherbereich ein- oder ausblenden">
+              <span class="section-toggle__icon" aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="section-body" id="storage-body">
+            <div class="storage-card__row storage-card__row--values">
+              <span id="storage-usage-label">Speicher wird geladen …</span>
+              <span id="storage-usage-free"></span>
+            </div>
+            <div class="progress-track" id="storage-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="progress-track__fill" id="storage-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- App-Logik -->
+    <div class="fab-wrapper">
+      <div class="fab-menu" aria-hidden="true">
+        <div class="fab-menu__group">
+          <p class="fab-menu__label">Neuer Upload</p>
+          <button type="button" data-fab-action="file">Datei auswählen</button>
+        </div>
+        <div class="fab-menu__group">
+          <p class="fab-menu__label">Schneller Link</p>
+          <div class="fab-menu__input-row">
+            <input type="url" id="fab-url-input" placeholder="https://..." />
+            <button type="button" data-fab-action="url-submit">OK</button>
+          </div>
+        </div>
+      </div>
+      <button class="fab" type="button" aria-label="Aktionen" aria-expanded="false">+</button>
+    </div>
+
     <script>
       const dropZone = document.getElementById("drop-zone");
       const fileInput = document.getElementById("file-input");
       const progressContainer = document.getElementById("progress-container");
       const filesTbody = document.getElementById("files-tbody");
+      const filesCards = document.getElementById("files-cards");
       const emptyState = document.getElementById("empty-state");
       const activeUploads = new Map();
       const urlInput = document.getElementById("url-input");
       const urlButton = document.getElementById("url-download-btn");
       const uploadWarning = document.getElementById("upload-warning");
+      const urlProgress = document.getElementById("url-progress");
       const storageUsageLabel = document.getElementById("storage-usage-label");
       const storageUsageFree = document.getElementById("storage-usage-free");
       const storageProgressBar = document.getElementById("storage-progress-bar");
       const storageProgressElement = document.getElementById("storage-progress");
       const sortButtons = document.querySelectorAll(".th-sort");
+      const viewButtons = document.querySelectorAll(".view-switch__btn[data-view]");
+      const filesViewLabel = document.getElementById("files-view-label");
+      const sectionToggles = document.querySelectorAll("[data-toggle-section]");
+      const fabWrapper = document.querySelector(".fab-wrapper");
+      const fabMenu = document.querySelector(".fab-menu");
+      const fabButton = document.querySelector(".fab");
+      const fabActionButtons = document.querySelectorAll("[data-fab-action]");
+      const fabUrlInput = document.getElementById("fab-url-input");
       const tableScroll = document.querySelector(".table-scroll");
 
       let currentFiles = [];
       let sortState = { column: "name", direction: "asc" };
+      let currentView = localStorage.getItem("copy-view") || "grid";
 
       updateSortButtons();
+      updateViewButtons();
 
       const beforeUnloadHandler = (event) => {
         if (activeUploads.size > 0) {
@@ -616,6 +891,13 @@
           uploadWarning.style.display = "none";
           window.removeEventListener("beforeunload", beforeUnloadHandler);
         }
+      }
+
+      function toggleUrlProgress(isActive) {
+        if (!urlProgress) {
+          return;
+        }
+        urlProgress.hidden = !isActive;
       }
 
       function updateSortButtons() {
@@ -650,10 +932,46 @@
         return (a.size - b.size) * direction;
       }
 
+      function updateViewButtons() {
+        viewButtons.forEach((button) => {
+          const isActive = button.dataset.view === currentView;
+          button.dataset.active = isActive ? "true" : "false";
+        });
+        if (filesViewLabel) {
+          filesViewLabel.textContent = currentView === "grid" ? "Rasteransicht" : "Listenansicht";
+        }
+      }
+
+      function setSectionState(targetId, expand) {
+        const body = document.getElementById(targetId);
+        const toggleBtn = document.querySelector(`[data-toggle-section="${targetId}"]`);
+        if (!body || !toggleBtn) {
+          return;
+        }
+        if (expand) {
+          body.removeAttribute("hidden");
+        } else {
+          body.setAttribute("hidden", "");
+        }
+        toggleBtn.setAttribute("aria-expanded", expand ? "true" : "false");
+        toggleBtn.classList.toggle("is-collapsed", !expand);
+        if (targetId === "files-body" && expand) {
+          renderFiles();
+        }
+        localStorage.setItem(`copy-section-${targetId}`, expand ? "open" : "closed");
+      }
+
       function renderFiles() {
         filesTbody.innerHTML = "";
+        if (filesCards) {
+          filesCards.innerHTML = "";
+        }
+
         if (!currentFiles.length) {
           emptyState.style.display = "block";
+          if (filesCards) {
+            filesCards.style.display = "none";
+          }
           if (tableScroll) {
             tableScroll.style.display = "none";
           }
@@ -661,8 +979,12 @@
         }
 
         emptyState.style.display = "none";
+        const showGrid = currentView === "grid";
+        if (filesCards) {
+          filesCards.style.display = showGrid ? "grid" : "none";
+        }
         if (tableScroll) {
-          tableScroll.style.display = "flex";
+          tableScroll.style.display = showGrid ? "none" : "block";
         }
         const sortedFiles = [...currentFiles].sort(compareFiles);
         sortedFiles.forEach((file) => {
@@ -670,9 +992,9 @@
           const icon = getFileIcon(file.name);
           row.innerHTML = `
             <td data-label="Dateiname">
-              <span class="file-entry">
+              <span class="file-entry" data-download="${file.name}">
                 <span class="file-icon" aria-hidden="true">${icon}</span>
-                <span class="filename" data-filename="${file.name}">${file.name}</span>
+                <span class="filename" data-filename="${file.name}" title="${file.name}">${file.name}</span>
               </span>
             </td>
             <td data-label="Größe" class="col-size">${file.size_formatted}</td>
@@ -680,19 +1002,52 @@
             <td data-label="Kurzlink">
               ${
                 file.short_link
-                  ? `<button class="btn-copy" data-copy="${file.short_link}">Copy</button>`
+                  ? `<button class="icon-btn btn-copy" type="button" data-copy="${file.short_link}" data-icon="📋" aria-label="Kurzlink kopieren">
+                      <span aria-hidden="true">📋</span>
+                    </button>`
                   : "-"
               }
             </td>
             <td data-label="Aktionen">
               <div class="actions">
-                <button class="btn-download" data-download="${file.name}">Download</button>
-                <button class="btn-delete" data-delete="${file.name}">Löschen</button>
+                <button class="icon-btn btn-delete" type="button" data-delete="${file.name}" aria-label="Löschen">
+                  <span aria-hidden="true">✕</span>
+                </button>
               </div>
             </td>
           `;
           filesTbody.appendChild(row);
+          if (filesCards) {
+            filesCards.appendChild(createFileCard(file, icon));
+          }
         });
+      }
+
+      function createFileCard(file, icon) {
+        const card = document.createElement("article");
+        card.className = "file-card";
+        card.innerHTML = `
+          <div class="file-card__preview" data-download="${file.name}">
+            <span aria-hidden="true">${icon}</span>
+          </div>
+          <div class="file-card__meta">
+            <p class="file-card__name filename" data-filename="${file.name}" title="${file.name}">${file.name}</p>
+            <p class="file-card__details">${file.size_formatted} · ${new Date(file.modified).toLocaleDateString("de-DE")}</p>
+          </div>
+          <div class="file-card__actions">
+            ${
+              file.short_link
+                ? `<button class="icon-btn btn-copy" type="button" data-copy="${file.short_link}" data-icon="📋" aria-label="Kurzlink kopieren">
+                    <span aria-hidden="true">📋</span>
+                  </button>`
+                : ""
+            }
+            <button class="icon-btn btn-delete" type="button" data-delete="${file.name}" aria-label="Löschen">
+              <span aria-hidden="true">✕</span>
+            </button>
+          </div>
+        `;
+        return card;
       }
 
       const FILE_ICONS = {
@@ -734,7 +1089,6 @@
         return FILE_ICONS[ext] || "📁";
       }
 
-      // Lädt Dateiliste beim Start und nach Aktionen
       async function loadFiles() {
         try {
           const response = await fetch("/api/files");
@@ -749,6 +1103,13 @@
         }
       }
 
+      const formatGB = (value) => {
+        if (typeof value !== "number" || Number.isNaN(value)) {
+          return null;
+        }
+        return `${(value / (1024 ** 3)).toFixed(1)} GB`;
+      };
+
       async function loadStorage() {
         try {
           const response = await fetch("/api/storage");
@@ -756,24 +1117,28 @@
             throw new Error("Speicherinfo nicht verfügbar");
           }
           const info = await response.json();
+          const usedGB = formatGB(info.used);
+          const totalGB = formatGB(info.total);
+          const freeGB = formatGB(info.free);
           if (storageUsageLabel) {
-            storageUsageLabel.textContent = `Verbraucht: ${info.used_formatted} von ${info.total_formatted}`;
+            if (usedGB && totalGB) {
+              storageUsageLabel.textContent = `Verbraucht: ${usedGB} von ${totalGB}`;
+            } else {
+              storageUsageLabel.textContent = `Verbraucht: ${info.used_formatted} von ${info.total_formatted}`;
+            }
           }
           if (storageUsageFree) {
-            storageUsageFree.textContent = `Frei: ${info.free_formatted}`;
+            if (freeGB) {
+              storageUsageFree.textContent = `Frei: ${freeGB}`;
+            } else {
+              storageUsageFree.textContent = `Frei: ${info.free_formatted}`;
+            }
           }
           if (storageProgressBar && storageProgressElement) {
-            const percentUsed =
-              info.total > 0 ? Math.min(100, (info.used / info.total) * 100) : 0;
+            const percentUsed = info.total > 0 ? Math.min(100, (info.used / info.total) * 100) : 0;
             storageProgressBar.style.width = `${percentUsed}%`;
-            storageProgressElement.setAttribute(
-              "aria-valuenow",
-              percentUsed.toFixed(1)
-            );
-            storageProgressElement.setAttribute(
-              "aria-label",
-              `Speicherauslastung ${percentUsed.toFixed(0)} Prozent`
-            );
+            storageProgressElement.setAttribute("aria-valuenow", percentUsed.toFixed(1));
+            storageProgressElement.setAttribute("aria-label", `Speicherauslastung ${percentUsed.toFixed(0)} Prozent`);
           }
         } catch (error) {
           if (storageUsageLabel) {
@@ -789,7 +1154,6 @@
         }
       }
 
-      // Sendet Dateien nacheinander zum Backend (inkl. Fortschritt)
       function uploadFiles(files) {
         if (!files || files.length === 0) {
           return;
@@ -809,16 +1173,20 @@
           item.innerHTML = `
             <div class="progress-row">
               <span class="progress-label">${file.name}</span>
-              <button type="button" class="progress-cancel" data-cancel>Abbrechen</button>
+              <button type="button" class="icon-btn btn-delete" data-cancel aria-label="Upload abbrechen">
+                <span aria-hidden="true">✕</span>
+              </button>
             </div>
-            <progress value="0" max="100"></progress>
+            <div class="progress-track">
+              <div class="progress-track__fill" data-progress-fill style="width: 0%"></div>
+            </div>
           `;
           progressContainer.appendChild(item);
           activeUploads.set(uploadId, { element: item, xhr });
           updateUploadWarning();
           progressContainer.style.display = "flex";
 
-          const progressElement = item.querySelector("progress");
+          const progressElement = item.querySelector("[data-progress-fill]");
           const labelElement = item.querySelector(".progress-label");
           const cancelButton = item.querySelector("[data-cancel]");
 
@@ -830,7 +1198,7 @@
           xhr.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable) {
               const percent = Math.round((event.loaded / event.total) * 100);
-              progressElement.value = percent;
+              progressElement.style.width = `${percent}%`;
               labelElement.textContent = `${file.name} – ${percent}%`;
             }
           });
@@ -877,20 +1245,15 @@
         });
       }
 
-      // Startet Dateidownload
       function downloadFile(filename) {
         window.location.href = `/download/${encodeURIComponent(filename)}`;
       }
 
-      // Löscht Datei nach Bestätigung
       async function deleteFile(filename) {
         if (!confirm(`Datei "${filename}" wirklich löschen?`)) {
           return;
         }
-        const response = await fetch(
-          `/api/files/${encodeURIComponent(filename)}`,
-          { method: "DELETE" }
-        );
+        const response = await fetch(`/api/files/${encodeURIComponent(filename)}`, { method: "DELETE" });
         if (response.ok) {
           loadFiles();
           loadStorage();
@@ -899,32 +1262,47 @@
         }
       }
 
-      async function downloadFromUrl() {
-        const url = urlInput.value.trim();
-        if (!url) {
+      async function downloadFromUrl(customUrl) {
+        const fromFab = typeof customUrl === "string";
+        const sourceInput = fromFab ? fabUrlInput : urlInput;
+        const rawValue = fromFab ? customUrl : urlInput.value;
+        const trimmedUrl = rawValue.trim();
+        if (!trimmedUrl) {
           alert("Bitte eine gültige URL eingeben.");
           return;
         }
+        const performClear = () => {
+          if (sourceInput) {
+            sourceInput.value = "";
+          }
+        };
+        const setLoadingState = (isLoading) => {
+          toggleUrlProgress(isLoading);
+          if (!fromFab && urlButton) {
+            urlButton.disabled = isLoading;
+          }
+        };
+        setLoadingState(true);
         try {
           const response = await fetch("/api/download-url", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url }),
+            body: JSON.stringify({ url: trimmedUrl }),
           });
           const payload = await response.json();
           if (!response.ok) {
             throw new Error(payload.error || "Download fehlgeschlagen.");
           }
           alert(payload.message || "Datei heruntergeladen.");
-          urlInput.value = "";
+          performClear();
           loadFiles();
           loadStorage();
         } catch (error) {
           alert(error.message);
+        } finally {
+          setLoadingState(false);
         }
       }
-
-      // --- Event Listener --------------------------------------------------
 
       sortButtons.forEach((button) => {
         button.addEventListener("click", () => {
@@ -939,6 +1317,25 @@
           }
           updateSortButtons();
           renderFiles();
+        });
+      });
+
+      sectionToggles.forEach((button) => {
+        const targetId = button.dataset.toggleSection;
+        if (!targetId) {
+          return;
+        }
+        const savedState = localStorage.getItem(`copy-section-${targetId}`);
+        if (savedState === "closed") {
+          setSectionState(targetId, false);
+        }
+        button.addEventListener("click", () => {
+          const body = document.getElementById(targetId);
+          if (!body) {
+            return;
+          }
+          const shouldExpand = body.hasAttribute("hidden");
+          setSectionState(targetId, shouldExpand);
         });
       });
 
@@ -957,10 +1354,36 @@
         uploadFiles(event.dataTransfer.files);
       });
 
+      if (fabWrapper) {
+        const handleFabDragLeave = () => fabWrapper.classList.remove("is-dropping");
+        fabWrapper.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          fabWrapper.classList.add("is-dropping");
+        });
+        fabWrapper.addEventListener("dragleave", handleFabDragLeave);
+        fabWrapper.addEventListener("drop", (event) => {
+          event.preventDefault();
+          handleFabDragLeave();
+          uploadFiles(event.dataTransfer.files);
+        });
+      }
+
       dropZone.addEventListener("click", () => fileInput.click());
-      fileInput.addEventListener("change", (event) =>
-          uploadFiles(event.target.files)
-        );
+      fileInput.addEventListener("change", (event) => uploadFiles(event.target.files));
+
+      viewButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const view = button.dataset.view;
+          if (!view || view === currentView) {
+            return;
+          }
+          currentView = view;
+          localStorage.setItem("copy-view", currentView);
+          updateViewButtons();
+          renderFiles();
+        });
+
+      });
 
       urlButton.addEventListener("click", downloadFromUrl);
       urlInput.addEventListener("keydown", (event) => {
@@ -970,24 +1393,115 @@
         }
       });
 
-      filesTbody.addEventListener("click", (event) => {
-        const target = event.target;
-        if (target.matches(".filename")) {
-          downloadFile(target.dataset.filename);
-        } else if (target.matches("[data-download]")) {
-          downloadFile(target.dataset.download);
-        } else if (target.matches("[data-delete]")) {
-          deleteFile(target.dataset.delete);
-        } else if (target.matches("[data-copy]")) {
+      function closeFabMenu() {
+        if (fabWrapper) {
+          fabWrapper.classList.remove("open");
+        }
+        if (fabButton) {
+          fabButton.setAttribute("aria-expanded", "false");
+        }
+        if (fabMenu) {
+          fabMenu.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function openFabMenu() {
+        if (fabWrapper) {
+          fabWrapper.classList.add("open");
+        }
+        if (fabButton) {
+          fabButton.setAttribute("aria-expanded", "true");
+        }
+        if (fabMenu) {
+          fabMenu.setAttribute("aria-hidden", "false");
+        }
+      }
+
+      if (fabButton && fabWrapper && fabMenu) {
+        fabButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (fabWrapper.classList.contains("open")) {
+            closeFabMenu();
+          } else {
+            openFabMenu();
+          }
+        });
+        if (fabMenu) {
+          fabMenu.addEventListener("click", (event) => event.stopPropagation());
+        }
+        document.addEventListener("click", (event) => {
+          if (!fabWrapper.contains(event.target)) {
+            closeFabMenu();
+          }
+        });
+      }
+
+      fabActionButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const action = button.dataset.fabAction;
+          setSectionState("upload-body", true);
+          if (action === "file") {
+            fileInput.click();
+          } else if (action === "url") {
+            urlInput.focus();
+            urlInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          closeFabMenu();
+        });
+      });
+
+      const handleFileActionClick = (event) => {
+        const filenameElement = event.target.closest(".filename");
+        if (filenameElement) {
+          downloadFile(filenameElement.dataset.filename);
+          return;
+        }
+
+        const downloadTarget = event.target.closest("[data-download]");
+        if (downloadTarget) {
+          downloadFile(downloadTarget.dataset.download);
+          return;
+        }
+
+        const deleteButton = event.target.closest("[data-delete]");
+        if (deleteButton) {
+          deleteFile(deleteButton.dataset.delete);
+          return;
+        }
+
+        const copyButton = event.target.closest("[data-copy]");
+        if (copyButton) {
           navigator.clipboard
-            .writeText(target.dataset.copy)
+            .writeText(copyButton.dataset.copy)
             .then(() => {
-              target.textContent = "Kopiert!";
-              setTimeout(() => (target.textContent = "Copy"), 1500);
+              copyButton.classList.add("copied");
+              const iconSpan = copyButton.querySelector("[aria-hidden]");
+              const srOnly = copyButton.querySelector(".sr-only");
+              if (iconSpan) {
+                iconSpan.textContent = "✔️";
+              }
+              if (srOnly) {
+                srOnly.textContent = "Kopiert";
+              }
+              setTimeout(() => {
+                copyButton.classList.remove("copied");
+                if (iconSpan) {
+                  iconSpan.textContent = copyButton.dataset.icon || "📋";
+                }
+                if (srOnly) {
+                  srOnly.textContent = "Kurzlink kopieren";
+                }
+              }, 1500);
             })
             .catch(() => alert("Konnte Kurzlink nicht kopieren."));
         }
-      });
+      };
+
+      filesTbody.addEventListener("click", handleFileActionClick);
+      if (filesCards) {
+        filesCards.addEventListener("click", handleFileActionClick);
+      }
 
       window.addEventListener("load", () => {
         loadFiles();
