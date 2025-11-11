@@ -1443,13 +1443,36 @@
           setSectionState("upload-body", true);
           if (action === "file") {
             fileInput.click();
-          } else if (action === "url") {
-            urlInput.focus();
-            urlInput.scrollIntoView({ behavior: "smooth", block: "center" });
+            closeFabMenu();
+            return;
           }
-          closeFabMenu();
+          if (action === "url-submit") {
+            const urlValue = fabUrlInput ? fabUrlInput.value.trim() : "";
+            if (!urlValue) {
+              alert("Bitte eine gültige URL eingeben.");
+            } else {
+              downloadFromUrl(urlValue);
+            }
+            closeFabMenu();
+            return;
+          }
         });
       });
+
+      if (fabUrlInput) {
+        fabUrlInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            const urlValue = fabUrlInput.value.trim();
+            if (!urlValue) {
+              alert("Bitte eine gültige URL eingeben.");
+              return;
+            }
+            downloadFromUrl(urlValue);
+            closeFabMenu();
+          }
+        });
+      }
 
       const handleFileActionClick = (event) => {
         const filenameElement = event.target.closest(".filename");
