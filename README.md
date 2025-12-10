@@ -40,6 +40,13 @@ Das Skript nutzt `.venv/bin/gunicorn`. Für einen manuellen Start:
 .venv/bin/gunicorn --bind 0.0.0.0:8089 --workers 4 app:app
 ```
 
+## Docker
+
+```bash
+docker compose up --build
+```
+Der Dienst lauscht anschließend auf `http://localhost:8089`.
+
 ## Konfiguration
 
 | Einstellung | Ort | Beschreibung |

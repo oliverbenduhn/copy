@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  copy:
+    build: .
+    container_name: copy-app
+    environment:
+      TIMEOUT: "180"
+      GRACEFUL_TIMEOUT: "180"
+      SENDFILE: "False"
+    volumes:
+      - ./transfer:/app/transfer
+      - ./slugs.json:/app/slugs.json
+    ports:
+      - "8089:8089"
