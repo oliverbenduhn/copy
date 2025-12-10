@@ -7,6 +7,12 @@ services:
       TIMEOUT: "180"
       GRACEFUL_TIMEOUT: "180"
       SENDFILE: "False"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8089/api/storage', timeout=5)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     volumes:
       - ./transfer:/app/transfer
       - ./slugs.json:/app/slugs.json
