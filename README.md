@@ -1,5 +1,7 @@
 # COPY
 
+Repository: https://github.com/oliverbenduhn/copy
+
 Einfache Flask-Anwendung zum Hochladen, Auflisten, Herunterladen, Teilen und Löschen von Dateien ohne Benutzerkonto. Frontend und Backend folgen der Projektspezifikation in `projekt.md`.
 
 > **Kommunikation:** Bitte ausschließlich auf Deutsch antworten, wenn Fragen zu diesem Projekt gestellt oder Änderungen beschrieben werden.
