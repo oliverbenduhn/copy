@@ -233,7 +233,14 @@ def get_files():
     try:
         files = list_upload_files()
         for entry in files:
-            slug = get_or_create_slug(entry["name"])
+            try:
+                slug = get_or_create_slug(entry["name"])
+            except Exception as exc:
+                logger.warning("Kurzlink konnte nicht erzeugt werden: %s", exc)
+                entry["short_code"] = None
+                entry["short_link"] = None
+                continue
+
             entry["short_code"] = slug
             try:
                 entry["short_link"] = url_for(
