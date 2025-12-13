@@ -386,6 +386,30 @@
       background: var(--primary-strong);
     }
 
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface-alt);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: 0 clamp(0.65rem, 1.8vw, 1rem);
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+    }
+
     .files {
       background: var(--surface);
       border-radius: var(--radius);
@@ -806,6 +830,12 @@
     <header class="app-bar">
       <div class="app-bar__avatar" aria-hidden="true"></div>
       <h1 style="flex:1">COPY</h1>
+      <button class="icon-button" id="search-toggle" aria-label="Suche">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+      </button>
       <button class="theme-toggle" id="theme-toggle" aria-label="Design wechseln">
         <svg class="icon-sun" viewBox="0 0 24 24">
           <path
@@ -876,6 +906,12 @@
             <span class="section-toggle__icon" aria-hidden="true"></span>
           </button>
         </div>
+      </div>
+      <div class="search-bar" id="search-bar" style="display: none;">
+        <input type="text" id="search-input" placeholder="Dateien durchsuchen..." aria-label="Dateien durchsuchen" />
+        <button type="button" class="icon-btn" id="search-clear" aria-label="Suche löschen">
+          <span aria-hidden="true">✕</span>
+        </button>
       </div>
       <div class="section-body" id="files-body">
         <div class="file-cards" id="files-cards"></div>
@@ -954,12 +990,17 @@
     const fabActionButtons = document.querySelectorAll("[data-fab-action]");
     const fabUrlInput = document.getElementById("fab-url-input");
     const tableScroll = document.querySelector(".table-scroll");
+    const searchToggle = document.getElementById("search-toggle");
+    const searchBar = document.getElementById("search-bar");
+    const searchInput = document.getElementById("search-input");
+    const searchClear = document.getElementById("search-clear");
 
     let currentFiles = [];
     let sortState = { column: "name", direction: "asc" };
     let currentView = localStorage.getItem("copy-view") || "grid";
     let transferUsageBytes = 0;
     let storageFreeBytes = null;
+    let searchQuery = "";
 
     updateSortButtons();
     updateViewButtons();
@@ -1119,8 +1160,17 @@
         filesCards.innerHTML = "";
       }
 
-      if (!currentFiles.length) {
+      let filesToDisplay = currentFiles;
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filesToDisplay = currentFiles.filter(file =>
+          file.name.toLowerCase().includes(query)
+        );
+      }
+
+      if (!filesToDisplay.length) {
         emptyState.style.display = "block";
+        emptyState.textContent = searchQuery ? "Keine Dateien gefunden." : "Keine Dateien vorhanden.";
         if (filesCards) {
           filesCards.style.display = "none";
         }
@@ -1138,7 +1188,7 @@
       if (tableScroll) {
         tableScroll.style.display = showGrid ? "none" : "block";
       }
-      const sortedFiles = [...currentFiles].sort(compareFiles);
+      const sortedFiles = [...filesToDisplay].sort(compareFiles);
       sortedFiles.forEach((file) => {
         const row = document.createElement("tr");
         const icon = getFileIcon(file.name);
@@ -1649,6 +1699,37 @@
     filesTbody.addEventListener("click", handleFileActionClick);
     if (filesCards) {
       filesCards.addEventListener("click", handleFileActionClick);
+    }
+
+    if (searchToggle && searchBar) {
+      searchToggle.addEventListener("click", () => {
+        const isVisible = searchBar.style.display !== "none";
+        if (isVisible) {
+          searchBar.style.display = "none";
+          searchInput.value = "";
+          searchQuery = "";
+          renderFiles();
+        } else {
+          searchBar.style.display = "flex";
+          searchInput.focus();
+        }
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener("input", (event) => {
+        searchQuery = event.target.value;
+        renderFiles();
+      });
+    }
+
+    if (searchClear) {
+      searchClear.addEventListener("click", () => {
+        searchInput.value = "";
+        searchQuery = "";
+        renderFiles();
+        searchInput.focus();
+      });
     }
 
     window.addEventListener("load", () => {
