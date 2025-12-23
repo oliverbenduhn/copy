@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-from flask import Flask, jsonify, redirect, request, send_from_directory, url_for
+from flask import Flask, jsonify, request, send_from_directory, url_for
 from flask_cors import CORS
 from werkzeug.http import parse_options_header
 from werkzeug.utils import secure_filename
@@ -25,12 +25,21 @@ from werkzeug.utils import secure_filename
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_FOLDER = BASE_DIR / "transfer"
 SLUG_FILE = BASE_DIR / "slugs.json"
+ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.zip', '.doc', '.docx', '.txt', '.csv', '.xlsx'}
+MAX_CONTENT_LENGTH = 500 * 1024 * 1024  # 500 MB
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_FOLDER)
+app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 CORS(app)
 
 logger = logging.getLogger("file-uploader")
 logging.basicConfig(level=logging.INFO)
+
+
+def allowed_file(filename: str) -> bool:
+    """Check if the file extension is allowed."""
+    return '.' in filename and \
+           os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def ensure_upload_dir() -> None:
@@ -199,11 +208,14 @@ def download_remote_file(url: str) -> str:
     }
     req = Request(url, headers=request_headers)
 
+    destination = None
     try:
         with urlopen(req, timeout=60) as response:  # nosec - urllib handles http/https
             final_url = response.geturl()
             headers = dict(response.headers)
             filename, _ = derive_filename_from_headers(final_url, headers)
+            if not allowed_file(filename):
+                raise ValueError("Dateityp nicht erlaubt")
             destination = validated_real_path(filename)
             content_length = headers.get("Content-Length")
             if content_length and content_length.isdigit():
@@ -217,13 +229,19 @@ def download_remote_file(url: str) -> str:
                     if not chunk:
                         break
                     written += len(chunk)
+                    if written > MAX_CONTENT_LENGTH:
+                        raise ValueError("Download überschreitet maximale Größe")
                     ensure_space_available(written)
                     target.write(chunk)
 
             return filename
     except ValueError:
+        if destination and destination.exists():
+            destination.unlink()
         raise
     except (HTTPError, URLError) as exc:  # pragma: no cover
+        if destination and destination.exists():
+            destination.unlink()
         raise RuntimeError("Fehler beim Herunterladen der Datei") from exc
 
 
@@ -272,8 +290,8 @@ def upload_file():
         return jsonify({"error": str(exc)}), 400
 
     secure_name = secure_filename(file.filename)
-    if not secure_name:
-        return jsonify({"error": "Ungültiger Dateiname"}), 400
+    if not secure_name or not allowed_file(secure_name):
+        return jsonify({"error": "Ungültiger Dateiname oder Dateityp nicht erlaubt"}), 400
 
     destination = UPLOAD_FOLDER / secure_name
     try:
@@ -325,8 +343,8 @@ def delete_file(filename: str):
 
     try:
         file_path.unlink()
-        logger.info("Datei %s gelöscht", file_path.name)
         delete_slug(file_path.name)
+        logger.info("Datei %s gelöscht", file_path.name)
         return jsonify({"success": True, "message": "Datei gelöscht"})
     except Exception as exc:  # pragma: no cover
         logger.exception("Fehler beim Löschen: %s", exc)
