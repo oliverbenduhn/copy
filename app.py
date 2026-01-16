@@ -289,7 +289,7 @@ def upload_file():
         return jsonify({"error": str(exc)}), 400
 
     secure_name = secure_filename(file.filename)
-    if not secure_name or not allowed_file(secure_name):
+    if not allowed_file(file.filename) or not secure_name:
         return jsonify({"error": "Ungültiger Dateiname oder Dateityp nicht erlaubt"}), 400
 
     destination = UPLOAD_FOLDER / secure_name
