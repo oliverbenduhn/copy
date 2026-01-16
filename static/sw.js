@@ -1,10 +1,10 @@
 const CACHE_NAME = "copy-cache-v1";
 const ASSETS = [
   "/",
-  "/static/index.html",
-  "/static/manifest.webmanifest",
-  "/static/icons/icon-192.png",
-  "/static/icons/icon-512.png",
+  "/index.html",
+  "/manifest.webmanifest",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
