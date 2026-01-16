@@ -92,6 +92,9 @@ def storage_info() -> dict:
 
 def load_slugs() -> Dict[str, str]:
     if SLUG_FILE.exists():
+        if SLUG_FILE.is_dir():
+            logger.critical("Slug file path %s is a directory, not a file. Please remove it.", SLUG_FILE)
+            return {}
         try:
             return json.loads(SLUG_FILE.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
@@ -100,6 +103,9 @@ def load_slugs() -> Dict[str, str]:
 
 
 def save_slugs(mapping: Dict[str, str]) -> None:
+    if SLUG_FILE.is_dir():
+        logger.critical("Cannot save slugs: path %s is a directory.", SLUG_FILE)
+        return
     SLUG_FILE.write_text(
         json.dumps(mapping, ensure_ascii=False, indent=2), encoding="utf-8"
     )
