@@ -37,9 +37,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 def allowed_file(filename: str) -> bool:
-    """Check if the file extension is allowed."""
-    return '.' in filename and \
-           os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
+    """Allow all file extensions."""
+    return True
 
 
 def ensure_upload_dir() -> None:
