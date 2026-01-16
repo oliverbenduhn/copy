@@ -1737,7 +1737,7 @@
       loadStorage();
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-          .register("/static/sw.js")
+          .register("/sw.js")
           .catch((error) =>
             console.error(
               "Service Worker konnte nicht registriert werden:",
