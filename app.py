@@ -167,8 +167,7 @@ def get_filestorage_size(file_storage) -> int | None:
 
 def validated_real_path(filename: str) -> Path:
     """Return safe absolute path for filename inside UPLOAD_FOLDER."""
-    secure_name = secure_filename(filename)
-    candidate = (UPLOAD_FOLDER / secure_name).resolve()
+    candidate = (UPLOAD_FOLDER / filename).resolve()
     upload_root = UPLOAD_FOLDER.resolve()
     if not str(candidate).startswith(str(upload_root)):
         raise PermissionError("Ungültiger Pfad außerhalb des Upload-Verzeichnisses")
