@@ -283,6 +283,8 @@ def upload_file():
     if file.filename == "":
         return jsonify({"error": "Kein Dateiname übermittelt"}), 400
 
+    logger.info("Prüfe Upload für Dateiname: '%s'", file.filename)
+
     try:
         ensure_space_available(get_filestorage_size(file))
     except ValueError as exc:
