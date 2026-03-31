@@ -14,4 +14,4 @@ RUN mkdir -p transfer
 
 EXPOSE 8089
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8089", "--workers", "4", "app:app"]
+CMD sh -c "gunicorn --bind 0.0.0.0:8089 --workers ${WORKERS:-4} --timeout ${TIMEOUT:-180} --graceful-timeout ${GRACEFUL_TIMEOUT:-180} app:app"
