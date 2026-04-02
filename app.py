@@ -26,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_FOLDER = BASE_DIR / "transfer"
 SLUG_FILE = BASE_DIR / "slugs.json"
 ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.zip', '.doc', '.docx', '.txt', '.csv', '.xlsx'}
-MAX_CONTENT_LENGTH = 500 * 1024 * 1024  # 500 MB
+MAX_CONTENT_LENGTH = None  # Keine Größenbeschränkung (Disk-Space-Check schützt)
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_FOLDER)
-app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+app.config["MAX_CONTENT_LENGTH"] = None  # Unbegrenzt
 CORS(app)
 
 logger = logging.getLogger("file-uploader")
@@ -233,8 +233,6 @@ def download_remote_file(url: str) -> str:
                     if not chunk:
                         break
                     written += len(chunk)
-                    if written > MAX_CONTENT_LENGTH:
-                        raise ValueError("Download überschreitet maximale Größe")
                     ensure_space_available(written)
                     target.write(chunk)
 
