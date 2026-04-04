@@ -138,7 +138,7 @@
     }
     #url-input:focus, #fab-url-input:focus { border-color: var(--accent); }
     #url-input::placeholder, #fab-url-input::placeholder { color: var(--text-muted); }
-    #url-progress { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.72rem; color: var(--text-muted); }
+    #url-progress { display: none; flex-direction: column; gap: 0.3rem; font-size: 0.72rem; color: var(--text-muted); }
 
     /* Buttons */
     .btn {
@@ -774,7 +774,7 @@
     async function dlFromUrl(input) {
       const url = (input && input.value || '').trim();
       if (!url) { toast('Bitte eine URL eingeben', 'info'); return; }
-      urlProg.hidden = false; if (urlBtn) urlBtn.disabled = true;
+      urlProg.style.display = "flex"; if (urlBtn) urlBtn.disabled = true;
       try {
         const r = await fetch('/api/download-url', {
           method: 'POST', headers: {'Content-Type':'application/json'},
@@ -786,7 +786,7 @@
         loadFiles(); loadStorage();
         toast(d.message || 'Datei heruntergeladen', 'success');
       } catch(e) { toast(e.message, 'error'); }
-      finally { urlProg.hidden = true; if (urlBtn) urlBtn.disabled = false; }
+      finally { urlProg.style.display = "none"; if (urlBtn) urlBtn.disabled = false; }
     }
 
     function onFileAction(e) {
